@@ -1,6 +1,6 @@
 <script>
 	import Tile from "./Tile.svelte";
-	import { layout } from "./layouts.js";
+	import { layout } from "./layout.js";
 	import { unlockTiles, showDrops, dropTarget, currentLayout } from "./stores.js";
 	import { fade } from 'svelte/transition';
 
