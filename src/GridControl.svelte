@@ -1,6 +1,6 @@
 <script>
 import { unlockTiles, currentLayout } from './stores.js';
-import { tileTypes } from './layouts.js';
+import { tileTypes } from './layout.js';
 
 let tileToAdd = null;
 
