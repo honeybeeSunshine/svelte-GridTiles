@@ -23,7 +23,7 @@ npx degit sveltejs/template my-svelte-project
 cd my-svelte-project
 npm install
 ```
-then plop the files from the GridTiles repo into your new /src folder and run:<br>
+then plop the files from this GridTiles repo into your new /src folder and run:<br>
 ```bash
 npm run dev
 ```
