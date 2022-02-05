@@ -29,9 +29,9 @@
 	}
 	let cssStyle = getCssStyle();
 
-	let dragThis = false;
+	let moveThis = false;
 	let resizeThis = false;
-	$: draggable = $unlockTiles && dragThis
+	$: draggable = $unlockTiles && moveThis
 	$: $dropTarget, adjustTile();
 
 	function adjustTile() {
@@ -40,22 +40,14 @@
 			let c = +x[1];
 			let r = +x[0];
 			if (resizeThis) {
+				rowEnd = r+1;
 				if (resizeThis === 'resizeRight') {
-					if (c > colStart && r > rowStart) {
-						colEnd = Math.max(c,colStart)+1;
-						colStart = Math.min(c,colStart);
-						rowEnd = Math.max(r,rowStart)+1;
-					}
-				}
-				else {
-					if ((c+1 < colEnd) && (r > rowStart)) {
-						colEnd = Math.max(c,colEnd);
-						colStart = Math.min(c,colEnd);
-						rowEnd = Math.max(r,rowStart)+1;
-					}
+					colEnd = c+1;
+				}	else {
+					colStart = c;
 				}
 			}
-			else if (dragThis) {
+			else if (moveThis) {
 				colEnd = colEnd - colStart + c;
 				colStart = c;
 				rowEnd = rowEnd - rowStart + r;
@@ -70,14 +62,14 @@
 	}
 
 	function reportDragging() {
-		dragThis=true;
+		moveThis=true;
 		resizeThis=false; //keep this: quick click bug
 		activeTile.set(thisTile);
 		showDrops.set(['move',[rowEnd-rowStart,colEnd-colStart]]);
 	}
 
 	function reportResize(blob) {
-		dragThis=false; //keep this: quick click bug
+		moveThis=false; //keep this: quick click bug
 		resizeThis=blob;
 		activeTile.set(thisTile);
 		if (blob === 'resizeLeft') {
@@ -93,7 +85,7 @@
 	}
 
 	function dragEnd (e) {
-		dragThis=false;
+		moveThis=false;
 		resizeThis=false;
 		activeTile.set(null);
 		showDrops.set(false);
