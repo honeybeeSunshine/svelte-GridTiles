@@ -115,7 +115,7 @@
 		  	</svg><span>lower (z={zIndex})</span>
 			</div>
 		</div>
-		<div class="resizeBlob topRight" draggable={true} on:click={closeTile} transition:fade>
+		<div class="resizeBlob topRight" on:click={closeTile} transition:fade>
 			<span>close</span>
 			<svg height="12" width="12">
 				<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="red"/>
