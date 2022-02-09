@@ -66,6 +66,7 @@
 		resizeThis=false; //keep this: quick click bug
 		activeTile.set(thisTile);
 		showDrops.set(['move',[rowEnd-rowStart,colEnd-colStart]]);
+		dragOrigin.set(rowStart+'-'+colStart)
 	}
 
 	function reportResize(blob) {
@@ -73,8 +74,10 @@
 		resizeThis=blob;
 		activeTile.set(thisTile);
 		if (blob === 'resizeLeft') {
+			dragOrigin.set((rowEnd-1)+'-'+(colStart));
 			showDrops.set([blob,[rowStart,colEnd]]);
 		} else if (blob === 'resizeRight') {
+			dragOrigin.set((rowEnd-1)+'-'+(colEnd-1));
 			showDrops.set([blob,[rowStart,colStart]]);
 		}
 	}
@@ -89,6 +92,7 @@
 		resizeThis=false;
 		activeTile.set(null);
 		showDrops.set(false);
+		dragOrigin.set(null);
 	}
 
 </script>
