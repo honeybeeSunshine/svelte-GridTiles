@@ -1,7 +1,7 @@
 <script>
 	import Tile from "./Tile.svelte";
 	import { layout } from "./layout.js";
-	import { unlockTiles, showDrops, dropTarget, currentLayout } from "./stores.js";
+	import { unlockTiles, showDrops, dropTarget, currentLayout, dragOrigin } from "./stores.js";
 	import { fade } from 'svelte/transition';
 
 	currentLayout.set(layout)
@@ -72,19 +72,21 @@
 	{#if ($unlockTiles && $showDrops)}
 		{#each rowLooper as r}
 			{#each colLooper as c}
-				<div class="dropDiv" style={`grid-column-start: ${c}; grid-row-start: ${r};`}>
-					<svg class={"drop "+$showDrops[0]}
-						on:drop={handleDrop}
-						on:dragenter={fillDrop}
-						on:dragover={fillDrop}
-						on:dragleave={(e) => e.target.setAttribute('fill', 'white')}
-						on:mouseup={() => {showDrops.set(false)}}
-						height="12" width="12"
-						transition:fade>
-						<circle id={r+'-'+c}
-							cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="white"/>
-					</svg>
-				</div>
+				{#if ($dragOrigin != (r+'-'+c))}
+					<div class="dropDiv" style={`grid-column-start: ${c}; grid-row-start: ${r};`}>
+						<svg class={"drop "+$showDrops[0]}
+							on:drop={handleDrop}
+							on:dragenter={fillDrop}
+							on:dragover={fillDrop}
+							on:dragleave={(e) => e.target.setAttribute('fill', 'white')}
+							on:mouseup={() => {showDrops.set(false)}}
+							height="12" width="12"
+							transition:fade>
+							<circle id={r+'-'+c}
+								cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="white"/>
+						</svg>
+					</div>
+				{/if}
 			{/each}
 		{/each}
 	{/if}
