@@ -6,10 +6,8 @@
 	const dispatch = createEventDispatcher();
 
 	function closeTile() {
-		dispatch('destroy', {"colStart": colStart, "colEnd": colEnd, "rowStart": rowStart, "rowEnd": rowEnd, "zIndex": zIndex})
+		dispatch('destroy')
 	};
-
-
 
 	let thisTile;
 
@@ -19,19 +17,10 @@
 	export let rowEnd = 14;
 	export let zIndex = 2000;
 
-	function getCssStyle() {
-	  let cssGridPositions = `grid-column-start: ${colStart};
-	                          grid-column-end: ${colEnd};
-	                          grid-row-start: ${rowStart};
-	                          grid-row-end: ${rowEnd};`
-	  let cssZIndex = `z-index: ${zIndex}; `
-	  return cssGridPositions + ' ' + cssZIndex;
-	}
-	let cssStyle = getCssStyle();
 
-	let moveThis = false;
+	let dragThis = false;
 	let resizeThis = false;
-	$: draggable = $unlockTiles && moveThis
+	$: draggable = $unlockTiles && dragThis
 	$: $dropTarget, adjustTile();
 
 	function adjustTile() {
@@ -47,13 +36,12 @@
 					colStart = c;
 				}
 			}
-			else if (moveThis) {
+			else if (dragThis) {
 				colEnd = colEnd - colStart + c;
 				colStart = c;
 				rowEnd = rowEnd - rowStart + r;
 				rowStart = r;
 			}
-			cssStyle = getCssStyle();
 			dropTarget.set(null);
 			activeTile.set(null);
 			showDrops.set(false);
@@ -62,33 +50,28 @@
 	}
 
 	function reportDragging() {
-		moveThis=true;
+		dragThis=true;
 		resizeThis=false; //keep this: quick click bug
 		activeTile.set(thisTile);
 		showDrops.set(['move',[rowEnd-rowStart,colEnd-colStart]]);
 		dragOrigin.set(rowStart+'-'+colStart)
 	}
 
-	function reportResize(blob) {
-		moveThis=false; //keep this: quick click bug
-		resizeThis=blob;
+	function reportResize(whichCorner) {
+		dragThis=false; //keep this: quick click bug
+		resizeThis=whichCorner;
 		activeTile.set(thisTile);
-		if (blob === 'resizeLeft') {
+		if (whichCorner === 'resizeLeft') {
 			dragOrigin.set((rowEnd-1)+'-'+(colStart));
-			showDrops.set([blob,[rowStart,colEnd]]);
-		} else if (blob === 'resizeRight') {
+			showDrops.set([whichCorner,[rowStart,colEnd]]);
+		} else if (whichCorner === 'resizeRight') {
 			dragOrigin.set((rowEnd-1)+'-'+(colEnd-1));
-			showDrops.set([blob,[rowStart,colStart]]);
+			showDrops.set([whichCorner,[rowStart,colStart]]);
 		}
 	}
 
-	function changeZ (d) {
-		zIndex = +zIndex + d;
-		cssStyle = getCssStyle();
-	}
-
 	function dragEnd (e) {
-		moveThis=false;
+		dragThis=false;
 		resizeThis=false;
 		activeTile.set(null);
 		showDrops.set(false);
@@ -100,40 +83,53 @@
 <div class="tile" bind:this={thisTile}
 									draggable={draggable}
 									on:dragend={dragEnd}
-									style={cssStyle}>
+									style:grid-column-start={colStart}
+									style:grid-column-end={colEnd}
+									style:grid-row-start={rowStart}
+									style:grid-row-end={rowEnd}
+									style:z-index={zIndex}
+									>
 	{#if $unlockTiles}
 		<div id="dragBar" transition:fade>
 			<div>
 				<svg height="12" width="12">
-			  	<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="orange" on:mousedown={reportDragging}/>
+			  	<circle class="grabBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="orange" on:mousedown={reportDragging}/>
 				</svg><span>move</span>
 			</div>
 			<div>
 				<svg height="12" width="12">
-					<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="linen" on:click={() => changeZ(1)}/>
+					<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="linen" on:click={() => zIndex = +zIndex + 1}/>
 				</svg><span>raise</span>
 			</div>
 			<div>
 				<svg height="12" width="12">
-					<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="grey" on:click={() => changeZ(-1)}/>
+					<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="grey" on:click={() => zIndex = +zIndex - 1}/>
 		  	</svg><span>lower (z={zIndex})</span>
 			</div>
 		</div>
-		<div class="resizeBlob topRight" on:click={closeTile} transition:fade>
+		<div class="resizeBlob topRight" draggable={true} on:click={closeTile} transition:fade>
 			<span>close</span>
 			<svg height="12" width="12">
-				<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="red"/>
+				<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="red"/>
 			</svg>
 		</div>
-		<div class="resizeBlob resizeLeft" draggable={true} on:mousedown={() => reportResize('resizeLeft')} transition:fade>
+		<div class="resizeBlob resizeLeft" 
+				 draggable={true} 
+				 on:mousedown={() => reportResize('resizeLeft')} 
+				 on:click={dragEnd}
+				 transition:fade>
 			<svg height="12" width="12">
-				<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="green"/>
+				<circle class="grabBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="green"/>
 			</svg><span>resize</span>
 		</div>
-		<div class="resizeBlob resizeRight" draggable={true} on:mousedown={() => reportResize('resizeRight')} transition:fade>
+		<div class="resizeBlob resizeRight" 
+				 draggable={true} 
+				 on:mousedown={() => reportResize('resizeRight')}
+				 on:click={dragEnd}
+				 transition:fade>
 			<span>resize</span>
 			<svg height="12" width="12">
-				<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="green"/>
+				<circle class="grabBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="green"/>
 			</svg>
 		</div>
 	{/if}
@@ -174,13 +170,23 @@
 
 	#dragBar span {
 		vertical-align: top;
+		user-select: none;
 	}
 
+	.grabBlob {
+		cursor: grab;		
+	}
+	
+	.pointBlob {
+		cursor: pointer;		
+	}
+	
 	.resizeBlob {
 		z-index: 2000;
 		font-family: Ubuntu, Comfortaa, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Cantarell, "Helvetica Neue", sans-serif;
 		font-size: 0.8em;
 		color: grey;
+		user-select: none;
 	}
 
 	.resizeBlob.topRight {
