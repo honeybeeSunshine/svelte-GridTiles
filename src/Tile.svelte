@@ -93,24 +93,24 @@
 		<div id="dragBar" transition:fade>
 			<div>
 				<svg height="12" width="12">
-			  	<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="orange" on:mousedown={reportDragging}/>
+			  	<circle class="grabBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="orange" on:mousedown={reportDragging}/>
 				</svg><span>move</span>
 			</div>
 			<div>
 				<svg height="12" width="12">
-					<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="linen" on:click={() => zIndex = +zIndex + 1}/>
+					<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="linen" on:click={() => zIndex = +zIndex + 1}/>
 				</svg><span>raise</span>
 			</div>
 			<div>
 				<svg height="12" width="12">
-					<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="grey" on:click={() => zIndex = +zIndex - 1}/>
+					<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="grey" on:click={() => zIndex = +zIndex - 1}/>
 		  	</svg><span>lower (z={zIndex})</span>
 			</div>
 		</div>
 		<div class="resizeBlob topRight" draggable={true} on:click={closeTile} transition:fade>
 			<span>close</span>
 			<svg height="12" width="12">
-				<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="red"/>
+				<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="red"/>
 			</svg>
 		</div>
 		<div class="resizeBlob resizeLeft" 
@@ -119,7 +119,7 @@
 				 on:click={dragEnd}
 				 transition:fade>
 			<svg height="12" width="12">
-				<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="green"/>
+				<circle class="grabBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="green"/>
 			</svg><span>resize</span>
 		</div>
 		<div class="resizeBlob resizeRight" 
@@ -129,7 +129,7 @@
 				 transition:fade>
 			<span>resize</span>
 			<svg height="12" width="12">
-				<circle cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="green"/>
+				<circle class="grabBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="green"/>
 			</svg>
 		</div>
 	{/if}
@@ -170,13 +170,23 @@
 
 	#dragBar span {
 		vertical-align: top;
+		user-select: none;
 	}
 
+	.grabBlob {
+		cursor: grab;		
+	}
+	
+	.pointBlob {
+		cursor: pointer;		
+	}
+	
 	.resizeBlob {
 		z-index: 2000;
 		font-family: Ubuntu, Comfortaa, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Cantarell, "Helvetica Neue", sans-serif;
 		font-size: 0.8em;
 		color: grey;
+		user-select: none;
 	}
 
 	.resizeBlob.topRight {
