@@ -10,7 +10,7 @@ Drag and drop resizable tiles on a responsive grid
 - your components appear inside the Tiles!<br>
 - svelte is awesome!<br>
 
-- works in Firefox, updated to now work in Chrome
+- tested to work in Firefox and Chrome
 - TODO: allow saving of custom layouts
 - TODO: enable touch interaction, currently mouse only
 
