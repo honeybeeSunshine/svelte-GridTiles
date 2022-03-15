@@ -1,7 +1,7 @@
 <script>
 	import { unlockTiles, showDrops, activeTile, dropTarget, dragOrigin } from './stores.js';
 	import { fade } from 'svelte/transition';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, tick } from 'svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -49,7 +49,8 @@
 		}
 	}
 
-	function reportDragging() {
+	function reportDragging({button}) {
+		if (button != 0) return
 		dragThis=true;
 		resizeThis=false; //keep this: quick click bug
 		activeTile.set(thisTile);
@@ -57,7 +58,8 @@
 		dragOrigin.set(rowStart+'-'+colStart)
 	}
 
-	function reportResize(whichCorner) {
+	function reportResize(button, whichCorner) {
+		if (button != 0) return
 		dragThis=false; //keep this: quick click bug
 		resizeThis=whichCorner;
 		activeTile.set(thisTile);
@@ -70,7 +72,7 @@
 		}
 	}
 
-	function dragEnd (e) {
+	function dragEnd () {
 		dragThis=false;
 		resizeThis=false;
 		activeTile.set(null);
@@ -98,24 +100,24 @@
 			</div>
 			<div>
 				<svg height="12" width="12">
-					<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="linen" on:click={() => zIndex = +zIndex + 1}/>
+					<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="linen" on:click={() => zIndex += 1}/>
 				</svg><span>raise</span>
 			</div>
 			<div>
 				<svg height="12" width="12">
-					<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="grey" on:click={() => zIndex = +zIndex - 1}/>
+					<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="grey" on:click={() => zIndex -= 1}/>
 		  	</svg><span>lower (z={zIndex})</span>
 			</div>
 		</div>
-		<div class="resizeBlob topRight" draggable={true} on:click={closeTile} transition:fade>
+		<div class="resizeBlob topRight" transition:fade>
 			<span>close</span>
 			<svg height="12" width="12">
-				<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="red"/>
+				<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="red" on:click={closeTile}/>
 			</svg>
 		</div>
 		<div class="resizeBlob resizeLeft" 
-				 draggable={true} 
-				 on:mousedown={() => reportResize('resizeLeft')} 
+				 draggable="true"
+				 on:mousedown={({button}) => reportResize(button, 'resizeLeft')} 
 				 on:click={dragEnd}
 				 transition:fade>
 			<svg height="12" width="12">
@@ -123,8 +125,8 @@
 			</svg><span>resize</span>
 		</div>
 		<div class="resizeBlob resizeRight" 
-				 draggable={true} 
-				 on:mousedown={() => reportResize('resizeRight')}
+				 draggable="true" 
+				 on:mousedown={({button}) => reportResize(button, 'resizeRight')}
 				 on:click={dragEnd}
 				 transition:fade>
 			<span>resize</span>
@@ -139,6 +141,7 @@
 
 
 <style>
+
 	.tile {
 		position: relative;
 		display: flex;

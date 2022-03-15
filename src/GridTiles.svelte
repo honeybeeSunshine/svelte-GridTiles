@@ -33,19 +33,12 @@
 
 
 
-	function handleDrop (e) {
-		let target = e.target;
+	function handleDrop ({target}) {
 		if (target.nodeName === 'svg')	{	//occasionally it reports the outer element
 			target = target.firstChild;
-			console.log(e);
 		}
 		target.setAttribute('fill', 'white');
 		dropTarget.set(target.id);
-	}
-
-	function fillDrop (e) {
-		e.preventDefault();
-		e.target.setAttribute('fill', 'black');
 	}
 
 	function closeTile(key) {
@@ -75,14 +68,14 @@
 				{#if ($dragOrigin != (r+'-'+c))}
 					<div class="dropDiv" style={`grid-column-start: ${c}; grid-row-start: ${r};`}>
 						<svg class={"drop "+$showDrops[0]}
-							on:drop={handleDrop}
-							on:dragenter={fillDrop}
-							on:dragover={fillDrop}
-							on:dragleave={(e) => e.target.setAttribute('fill', 'white')}
-							on:mouseup={() => {showDrops.set(false)}}
 							height="12" width="12"
 							transition:fade>
 							<circle id={r+'-'+c}
+								on:drop={handleDrop}
+								on:dragenter={({target}) => target.setAttribute('fill', 'black')}
+								on:dragover|preventDefault={({target}) => target.setAttribute('fill', 'black')}
+								on:dragleave={({target}) => target.setAttribute('fill', 'white')}
+								on:mouseup={() => {showDrops.set(false)}}
 								cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="white"/>
 						</svg>
 					</div>
