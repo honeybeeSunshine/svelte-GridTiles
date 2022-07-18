@@ -94,6 +94,11 @@
 		if (/WebKit/.test(navigator.userAgent)) e.dataTransfer.setDragImage(e.target.firstChild, 0, 0)
 	}
 
+	function handle_zAdjust(d) {
+		zIndex += d;
+		dispatch('adjust', {"colStart": colStart, "colEnd": colEnd, "rowStart": rowStart, "rowEnd": rowEnd, "zIndex": zIndex})
+	}
+
 </script>
 
 <div class="tile" bind:this={thisTile}
@@ -116,12 +121,12 @@
 			</div>
 			<div>
 				<svg height="12" width="12">
-					<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="linen" on:click={() => zIndex += 1}/>
+					<circle class="pointBlob" cx="6" cy="6" r="5" fill="linen" on:click={() => handle_zAdjust(1)}/>
 				</svg><span>raise</span>
 			</div>
 			<div>
 				<svg height="12" width="12">
-					<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="grey" on:click={() => zIndex -= 1}/>
+					<circle class="pointBlob" cx="6" cy="6" r="5" fill="grey" on:click={() => handle_zAdjust(-1)}/>
 		  	</svg><span>lower (z={zIndex})</span>
 			</div>
 		</div>
