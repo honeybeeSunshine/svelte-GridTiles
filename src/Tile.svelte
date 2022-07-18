@@ -1,7 +1,7 @@
 <script>
 	import { unlockTiles, showDrops, activeTile, dropTarget, dragOrigin } from './stores.js';
 	import { fade } from 'svelte/transition';
-	import { createEventDispatcher, tick } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -18,9 +18,9 @@
 	export let zIndex = 2000;
 
 
-	let dragThis = false;
+	let moveThis = false;
 	let resizeThis = false;
-	$: draggable = $unlockTiles && dragThis
+	$: draggable = $unlockTiles && moveThis
 	$: $dropTarget, adjustTile();
 
 	function adjustTile() {
@@ -36,7 +36,7 @@
 					colStart = c;
 				}
 			}
-			else if (dragThis) {
+			else if (moveThis) {
 				colEnd = colEnd - colStart + c;
 				colStart = c;
 				rowEnd = rowEnd - rowStart + r;
@@ -51,7 +51,7 @@
 
 	function reportDragging({button}) {
 		if (button != 0) return
-		dragThis=true;
+		moveThis=true;
 		resizeThis=false; //keep this: quick click bug
 		activeTile.set(thisTile);
 		showDrops.set(['move',[rowEnd-rowStart,colEnd-colStart]]);
@@ -60,7 +60,7 @@
 
 	function reportResize(button, whichCorner) {
 		if (button != 0) return
-		dragThis=false; //keep this: quick click bug
+		moveThis=false; //keep this: quick click bug
 		resizeThis=whichCorner;
 		activeTile.set(thisTile);
 		if (whichCorner === 'resizeLeft') {
@@ -72,19 +72,35 @@
 		}
 	}
 
-	function dragEnd () {
-		dragThis=false;
+	function moveEnd () {
+		moveThis=false;
+		if (!resizeThis) {
+			activeTile.set(null);
+			showDrops.set(false);
+			dragOrigin.set(null);
+		}
+	}
+
+	function resizeEnd () {
+		moveThis=false;
 		resizeThis=false;
 		activeTile.set(null);
 		showDrops.set(false);
 		dragOrigin.set(null);
 	}
 
+	function handle_dragStart(e) {
+		e.dataTransfer.setData("text", e.target.id);
+		if (/WebKit/.test(navigator.userAgent)) e.dataTransfer.setDragImage(e.target.firstChild, 0, 0)
+	}
+
 </script>
 
 <div class="tile" bind:this={thisTile}
 									draggable={draggable}
-									on:dragend={dragEnd}
+									on:dragstart={handle_dragStart}
+									on:dragend={moveEnd}
+									on:click={moveEnd}
 									style:grid-column-start={colStart}
 									style:grid-column-end={colEnd}
 									style:grid-row-start={rowStart}
@@ -95,7 +111,7 @@
 		<div id="dragBar" transition:fade>
 			<div>
 				<svg height="12" width="12">
-			  	<circle class="grabBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="orange" on:mousedown={reportDragging}/>
+			  	<circle class="grabBlob" cx="6" cy="6" r="5" fill="orange" on:mousedown={reportDragging}/>
 				</svg><span>move</span>
 			</div>
 			<div>
@@ -112,26 +128,28 @@
 		<div class="resizeBlob topRight" transition:fade>
 			<span>close</span>
 			<svg height="12" width="12">
-				<circle class="pointBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="red" on:click={closeTile}/>
+				<circle class="pointBlob" cx="6" cy="6" r="5" fill="red" on:click={closeTile}/>
 			</svg>
 		</div>
 		<div class="resizeBlob resizeLeft" 
 				 draggable="true"
+				 on:dragstart={handle_dragStart}
 				 on:mousedown={({button}) => reportResize(button, 'resizeLeft')} 
-				 on:click={dragEnd}
+				 on:click={resizeEnd}
 				 transition:fade>
 			<svg height="12" width="12">
-				<circle class="grabBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="green"/>
+				<circle class="grabBlob" cx="6" cy="6" r="5" fill="green"/>
 			</svg><span>resize</span>
 		</div>
 		<div class="resizeBlob resizeRight" 
 				 draggable="true" 
+				 on:dragstart={handle_dragStart}
 				 on:mousedown={({button}) => reportResize(button, 'resizeRight')}
-				 on:click={dragEnd}
+				 on:click={resizeEnd}
 				 transition:fade>
 			<span>resize</span>
 			<svg height="12" width="12">
-				<circle class="grabBlob" cx="6" cy="6" r="5" stroke="grey" stroke-width="1" fill="green"/>
+				<circle class="grabBlob" cx="6" cy="6" r="5" fill="green"/>
 			</svg>
 		</div>
 	{/if}
@@ -141,6 +159,11 @@
 
 
 <style>
+
+	circle {
+		stroke: grey;
+		stroke-width: 1;
+	}
 
 	.tile {
 		position: relative;
