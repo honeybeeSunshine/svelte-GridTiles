@@ -14,10 +14,17 @@
 
 	let totalHeight;
 	let totalWidth;
-	$: cols = Math.floor(totalWidth / 45);
-	$: rows = Math.floor(totalHeight / 36);
-	$: cssStyleGrid = `grid-template-columns: repeat(${cols}, 1fr);
-										 grid-template-rows: repeat(${rows}, 30px);`;
+
+	export let cols = 20;
+	export let rows = 20;
+	export let gap = 0.4; //in percent
+
+	$: cssStyleGrid = `grid-template-columns: repeat(${cols}, ${
+		(100 - cols * gap) / cols
+	}%);
+										 grid-template-rows: repeat(${rows}, ${
+		(100 - rows * gap) / rows
+	}%); gap: ${gap}%`;
 
 	//create arrays of valid drop spots for drag and drop
 	$: colArray = Array.from({ length: cols }, (v, i) => i + 1); //Array.from('0'.repeat(cols))
@@ -106,8 +113,13 @@
 		{/each}
 	{/if}
 	{#each $currentLayout as tile (tile.key)}
+		<!-- {...tile.position} -->
 		<Tile
-			{...tile.position}
+			colStart={tile.position.colStart}
+			rowStart={tile.position.rowStart}
+			colEnd={tile.position.colEnd > cols ? -1 : tile.position.colEnd}
+			rowEnd={tile.position.rowEnd > rows ? -1 : tile.position.rowEnd}
+			zIndex={tile.position.zIndex}
 			on:destroy={() => closeTile(tile.key)}
 			on:adjust={(e) => adjustTile(e, tile.key)}
 		>
@@ -118,9 +130,10 @@
 
 <style>
 	#tileGrid {
+		width: 100%;
+		height: 100%;
 		position: relative;
 		display: grid;
-		grid-gap: 0.3em;
 		background: linen;
 	}
 
