@@ -187,11 +187,12 @@
       draggable="true"
       on:dragstart={handle_dragStart}
       on:mousedown={({ button }) => reportResize(button, "resizeLeft")}
+      on:dragend={resizeEnd}
       on:click={resizeEnd}
       transition:fade
     >
       <svg height="12" width="12">
-        <circle class="grabBlob" cx="6" cy="6" r="5" fill="green" />
+        <circle cx="6" cy="6" r="5" fill="green" />
       </svg><span>resize</span>
     </div>
     <div
@@ -199,12 +200,13 @@
       draggable="true"
       on:dragstart={handle_dragStart}
       on:mousedown={({ button }) => reportResize(button, "resizeRight")}
+      on:dragend={resizeEnd}
       on:click={resizeEnd}
       transition:fade
     >
       <span>resize</span>
       <svg height="12" width="12">
-        <circle class="grabBlob" cx="6" cy="6" r="5" fill="green" />
+        <circle cx="6" cy="6" r="5" fill="green" />
       </svg>
     </div>
   {/if}
@@ -219,20 +221,16 @@
 
   .tile {
     position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    border: solid;
-    border-color: grey;
-    border-width: 1px;
+    /* overflow: hidden; */
+    display: grid;
+    place-items: center;
+    border: 1px solid grey;
     border-radius: 5px;
-    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.3);
+    box-shadow: 2px 2px 1px rgba(0, 0, 0, 0.3);
     background: white;
   }
 
   #dragBar {
-    /* isolation: isolate; */
     z-index: 1000;
     display: flex;
     flex-direction: column;
@@ -281,6 +279,7 @@
     bottom: -2px;
     left: 1px;
     vertical-align: bottom;
+    cursor: nesw-resize;
   }
 
   .resizeBlob.resizeRight {
@@ -288,5 +287,6 @@
     bottom: -2px;
     right: 1px;
     vertical-align: bottom;
+    cursor: nwse-resize;
   }
 </style>
